@@ -49,5 +49,13 @@
   "files.autoSave": "off",
   "files.insertFinalNewline": true, // Added new line at the end of the file
   "files.trimTrailingWhitespace": true,
-  "files.trimFinalNewlines": true
+  "files.trimFinalNewlines": true,
+
+  // ----------------------------------------
+  // ========== Terminal ==========
+  // ----------------------------------------
+  "terminal.integrated.cursorBlinking": true,
+  "terminal.integrated.cursorStyle": "line",
+  "terminal.integrated.fontSize": 18,
+  "terminal.integrated.lineHeight": 1
 }
