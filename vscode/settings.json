@@ -8,18 +8,33 @@
   "editor.fontSize": 16,
   // "editor.fontWeight": "normal",
   "editor.lineHeight": 2,
+  // "editor.lineNumbers": "on",
+  "editor.renderWhitespace": "trailing",
   "editor.tabSize": 2,
   "editor.wordWrap": "on",
 
   // "breadcrumbs.enabled": true, // Default: true
 
+  "window.autoDetectColorScheme": true,
   "window.zoomLevel": -1,
+  "window.dialogStyle": "custom",
+  // "window.nativeTabs": true,
+  "window.title": "${rootName}",
 
   "workbench.colorTheme": "Default Dark Modern",
   // "workbench.editor.enablePreview": false,
+  "workbench.fontAliasing": "auto",
   "workbench.editor.highlightModifiedTabs": true,
   // "workbench.editor.showTabs": "multiple",
   "workbench.editor.tabSizing": "shrink",
+  // "workbench.editor.tabActionLocation": "right",
+  "workbench.iconTheme": "vscode-icons",
+  // "workbench.list.smoothScrolling": false,
+  // "workbench.sideBar.location": "left",
+  // "workbench.startupEditor": "welcomePage",
+  "workbench.editor.limit.enabled": true,
+  "workbench.editor.limit.perEditorGroup": true,
+  "workbench.editor.limit.value": 5,
 
   // ----------------------------------------
   // ========== Editor ==========
@@ -41,6 +56,7 @@
   "explorer.confirmDragAndDrop": true,
   "explorer.sortOrder": "type",
 
+  "workbench.editor.closeOnFileDelete": true,
   "workbench.settings.editor": "json",
 
   // ----------------------------------------
@@ -50,6 +66,7 @@
   "files.insertFinalNewline": true, // Added new line at the end of the file
   "files.trimTrailingWhitespace": true,
   "files.trimFinalNewlines": true,
+  "files.eol": "\n",
 
   // ----------------------------------------
   // ========== Terminal ==========
@@ -57,5 +74,8 @@
   "terminal.integrated.cursorBlinking": true,
   "terminal.integrated.cursorStyle": "line",
   "terminal.integrated.fontSize": 18,
-  "terminal.integrated.lineHeight": 1
+  "terminal.integrated.fontWeight": "300",
+  "terminal.integrated.lineHeight": 1,
+  "terminal.integrated.persistentSessionReviveProcess": "never",
+  // "terminal.integrated.tabs.enabled": true,
 }
