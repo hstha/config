@@ -1,0 +1,53 @@
+{
+  // ----------------------------------------
+  // ========== Visuals ==========
+  // ----------------------------------------
+  // install fonts: https://github.com/tonsky/FiraCode?tab=readme-ov-file
+  "editor.fontFamily": "'Fira Code', Menlo, Monaco, 'Courier New', monospace",
+  "editor.fontLigatures": true,
+  "editor.fontSize": 16,
+  // "editor.fontWeight": "normal",
+  "editor.lineHeight": 2,
+  "editor.tabSize": 2,
+  "editor.wordWrap": "on",
+
+  // "breadcrumbs.enabled": true, // Default: true
+
+  "window.zoomLevel": -1,
+
+  "workbench.colorTheme": "Default Dark Modern",
+  // "workbench.editor.enablePreview": false,
+  "workbench.editor.highlightModifiedTabs": true,
+  // "workbench.editor.showTabs": "multiple",
+  "workbench.editor.tabSizing": "shrink",
+
+  // ----------------------------------------
+  // ========== Editor ==========
+  // ----------------------------------------
+  "editor.acceptSuggestionOnEnter": "smart",
+  "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit",
+      "source.removeUnusedImports": "explicit",
+      "source.sortImports": "explicit"
+  },
+  // "editor.cursorBlinking": "blink", // Default: "blink"
+  // "editor.cursorStyle": "line", // Default: "line"
+  // "editor.detectIndentation": true,
+  "editor.formatOnSave": true,
+  "editor.formatOnSaveMode": "modifications",
+  "editor.rulers": [120],
+
+  // "explorer.autoReveal": true, // Default: true
+  "explorer.confirmDragAndDrop": true,
+  "explorer.sortOrder": "type",
+
+  "workbench.settings.editor": "json",
+
+  // ----------------------------------------
+  // ========== File ==========
+  // ----------------------------------------
+  "files.autoSave": "off",
+  "files.insertFinalNewline": true, // Added new line at the end of the file
+  "files.trimTrailingWhitespace": true,
+  "files.trimFinalNewlines": true
+}
