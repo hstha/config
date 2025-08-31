@@ -1,0 +1,58 @@
+{
+  // ===============================
+  // ------------ Font ------------
+  // ===============================
+  // install fonts: https://github.com/tonsky/FiraCode?tab=readme-ov-file
+  "editor.fontFamily": "'Fira Code', Menlo, Monaco, 'Courier New', monospace",
+  "editor.fontLigatures": true,
+  "editor.fontSize": 16,
+  "editor.lineHeight": 2,
+  "editor.cursorSmoothCaretAnimation": "on",
+
+  // ===============================
+  // ------ Code Readability ------
+  // ===============================
+  "editor.tabSize": 2,
+  "editor.wordWrap": "on",
+  "editor.bracketPairColorization.enabled": true,
+  "editor.rulers": [120],
+  "editor.renderWhitespace": "trailing",
+  "editor.lineNumbers": "on",
+  "files.autoSave": "off",
+  "files.insertFinalNewline": true,
+  "files.trimTrailingWhitespace": true,
+  "files.trimFinalNewlines": true,
+  "files.eol": "\n",
+
+  // ===============================
+  // ------ Code Formatting ------
+  // ===============================
+  "editor.formatOnSave": true,
+  "editor.formatOnSaveMode": "modifications",
+  "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit",
+      "source.removeUnusedImports": "explicit",
+      "source.sortImports": "explicit"
+  },
+
+  // ===============================
+  // ------------ File ------------
+  // ===============================
+  "breadcrumbs.enabled": false,
+  "window.zoomLevel": 0,
+  "editor.minimap.enabled": true,
+  "window.autoDetectColorScheme": true,
+  "workbench.editor.highlightModifiedTabs": true,
+  "editor.acceptSuggestionOnEnter": "smart",
+
+  // ===============================
+  // ---------- Terminal ----------
+  // ===============================
+  "terminal.integrated.cursorBlinking": true,
+  "terminal.integrated.fontSize": 16,
+  "terminal.integrated.cursorStyle": "block",
+  "terminal.integrated.fontWeight": "200",
+  "terminal.integrated.fontFamily": "Courier New, monospace",
+  "terminal.integrated.lineHeight": 1,
+  "terminal.integrated.persistentSessionReviveProcess": "never"
+}
