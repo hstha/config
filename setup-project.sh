@@ -33,7 +33,6 @@ fi
 
 # Base GitHub raw URL
 BASE_URL="https://raw.githubusercontent.com/hstha/config/main"
-DOCKERFILE_URL="${BASE_URL}/Dockerfile"
 VSCODE_URL="${BASE_URL}/.vscode"
 
 # Core extensions (always included)
@@ -72,7 +71,7 @@ done
 EXTENSIONS=("${CORE_EXTENSIONS[@]}")
 
 if $IS_FRONTEND; then
-  EXTENSIONS+=("${FRONTEND_CORE_EXTENSIONS[@]}")
+  EXTENSIONS+=("${FRONTEND_EXTENSIONS[@]}")
 fi
 
 for ext in "${TEMP_EXT[@]}"; do
@@ -85,14 +84,16 @@ for ext in "${TEMP_EXT[@]}"; do
   fi
 done
 
-# Create .devcontainer
+# Create .devcontainer and download Dockerfile
 mkdir -p .devcontainer
+curl -sSL "${BASE_URL}/Dockerfile" -o .devcontainer/Dockerfile
 
+# Generate devcontainer.json
 cat > .devcontainer/devcontainer.json <<EOF
 {
   "name": "${CONTAINER_NAME}",
   "build": {
-    "dockerfile": "${DOCKERFILE_URL}",
+    "dockerfile": "Dockerfile",
     "context": "."
   },
   "settings": {
@@ -110,4 +111,4 @@ mkdir -p .vscode
 curl -sSL "${VSCODE_URL}/settings.json" -o .vscode/settings.json
 curl -sSL "${VSCODE_URL}/launch.json" -o .vscode/launch.json
 
-echo "✅ Devcontainer created with core + ${TEMP_EXT[*]} extensions"
+echo "✅ Devcontainer \"${CONTAINER_NAME}\" created with core + ${TEMP_EXT[*]} extensions"
