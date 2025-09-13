@@ -1,9 +1,15 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# setup-project --name myproject --temp-ext angular tailwindcss
+# setup-devcontainer.sh
+# Usage: ./setup-devcontainer.sh --name myproject --angular --tailwindcss --verbose
 
-TEMP_EXT=()
+set -e
+
+# Default values
 CONTAINER_NAME="custom-devcontainer"
+TEMP_EXT=()
+VERBOSE=false
+CLEAN=false
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -12,12 +18,17 @@ while [[ $# -gt 0 ]]; do
       CONTAINER_NAME="$2"
       shift 2
       ;;
-    --temp-ext)
+    --verbose)
+      VERBOSE=true
       shift
-      while [[ $# -gt 0 && "$1" != --* ]]; do
-        TEMP_EXT+=("$1")
-        shift
-      done
+      ;;
+    --clean)
+      CLEAN=true
+      shift
+      ;;
+    --angular|--tailwindcss|--springboot|--react|--vue|--node|--python)
+      TEMP_EXT+=("${1/--/}")
+      shift
       ;;
     *)
       echo "❌ Unknown argument: $1"
@@ -26,8 +37,14 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+# Clean previous setup
+if $CLEAN; then
+  rm -rf .devcontainer .vscode
+  echo "🧹 Cleaned previous setup"
+fi
+
 if [[ ${#TEMP_EXT[@]} -eq 0 ]]; then
-  echo "❌ Please provide at least one value for --temp-ext"
+  echo "❌ Please provide at least one tech stack flag"
   exit 1
 fi
 
@@ -35,7 +52,7 @@ fi
 BASE_URL="https://raw.githubusercontent.com/hstha/config/main"
 VSCODE_URL="${BASE_URL}/.vscode"
 
-# Core extensions (always included)
+# Core extensions
 CORE_EXTENSIONS=(
   "streetsidesoftware.code-spell-checker"
   "github.copilot"
@@ -52,24 +69,27 @@ FRONTEND_EXTENSIONS=(
   "esbenp.prettier-vscode"
 )
 
-# Extension sets for temp-ext values
+# Extension map
 declare -A EXTENSION_MAP
-EXTENSION_MAP["angular"]="ms-vscode.vscode-typescript-next dbaeumer.vscode-eslint angular.ng-template"
+EXTENSION_MAP["angular"]="ms-vscode.vscode-typescript-next angular.ng-template"
 EXTENSION_MAP["tailwindcss"]="bradlc.vscode-tailwindcss"
 EXTENSION_MAP["springboot"]="vscjava.vscode-java-pack pivotal.vscode-spring-boot redhat.java"
+EXTENSION_MAP["react"]="ms-vscode.vscode-typescript-next"
+EXTENSION_MAP["vue"]="vue.volar"
+EXTENSION_MAP["node"]="ms-vscode.node-debug2"
+EXTENSION_MAP["python"]="ms-python.python ms-toolsai.jupyter"
 
-# Detect if frontend tech is present
+# Detect frontend tech
 IS_FRONTEND=false
 for ext in "${TEMP_EXT[@]}"; do
-  if [[ "$ext" == "angular" || "$ext" == "react" || "$ext" == "vue" || "$ext" == "tailwindcss" ]]; then
+  if [[ "$ext" =~ ^(angular|react|vue|tailwindcss)$ ]]; then
     IS_FRONTEND=true
     break
   fi
 done
 
-# Collect all extensions
+# Collect extensions
 EXTENSIONS=("${CORE_EXTENSIONS[@]}")
-
 if $IS_FRONTEND; then
   EXTENSIONS+=("${FRONTEND_EXTENSIONS[@]}")
 fi
@@ -80,13 +100,14 @@ for ext in "${TEMP_EXT[@]}"; do
       EXTENSIONS+=("$e")
     done
   else
-    echo "⚠️ Warning: Unknown temp-ext '$ext' — skipping"
+    echo "⚠️ Warning: Unknown tech '$ext' — skipping"
   fi
 done
 
-# Create .devcontainer and download Dockerfile
+# Create devcontainer folder
 mkdir -p .devcontainer
 curl -sSL "${BASE_URL}/Dockerfile" -o .devcontainer/Dockerfile
+$VERBOSE && echo "📦 Dockerfile downloaded"
 
 # Generate devcontainer.json
 cat > .devcontainer/devcontainer.json <<EOF
@@ -105,10 +126,21 @@ cat > .devcontainer/devcontainer.json <<EOF
   "postCreateCommand": "echo '🚀 Devcontainer ready with: core + ${TEMP_EXT[*]}'"
 }
 EOF
+$VERBOSE && echo "🛠 devcontainer.json created"
 
-# Pull .vscode settings
+# Pull VS Code settings
 mkdir -p .vscode
 curl -sSL "${VSCODE_URL}/settings.json" -o .vscode/settings.json
 curl -sSL "${VSCODE_URL}/launch.json" -o .vscode/launch.json
+$VERBOSE && echo "⚙️ VS Code settings downloaded"
+
+# Copy starter templates
+for ext in "${TEMP_EXT[@]}"; do
+  TEMPLATE_DIR="templates/${ext}"
+  if [[ -d "$TEMPLATE_DIR" ]]; then
+    cp -r "$TEMPLATE_DIR/"* .
+    $VERBOSE && echo "📁 Starter files copied from $TEMPLATE_DIR"
+  fi
+done
 
 echo "✅ Devcontainer \"${CONTAINER_NAME}\" created with core + ${TEMP_EXT[*]} extensions"
