@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # setup-devcontainer.sh
-# Usage: ./setup-devcontainer.sh --name myproject --angular --tailwindcss --verbose
+# Usage: ./setup-devcontainer.sh --name myproject --temp-ext angular tailwindcss --verbose
 
 set -e
 
@@ -18,16 +18,19 @@ while [[ $# -gt 0 ]]; do
       CONTAINER_NAME="$2"
       shift 2
       ;;
+    --temp-ext)
+      shift
+      while [[ $# -gt 0 && "$1" != --* ]]; do
+        TEMP_EXT+=("$1")
+        shift
+      done
+      ;;
     --verbose)
       VERBOSE=true
       shift
       ;;
     --clean)
       CLEAN=true
-      shift
-      ;;
-    --angular|--tailwindcss|--springboot|--react|--vue|--node|--python)
-      TEMP_EXT+=("${1/--/}")
       shift
       ;;
     *)
@@ -44,7 +47,7 @@ if $CLEAN; then
 fi
 
 if [[ ${#TEMP_EXT[@]} -eq 0 ]]; then
-  echo "❌ Please provide at least one tech stack flag"
+  echo "❌ Please provide at least one value for --temp-ext"
   exit 1
 fi
 
@@ -100,7 +103,7 @@ for ext in "${TEMP_EXT[@]}"; do
       EXTENSIONS+=("$e")
     done
   else
-    echo "⚠️ Warning: Unknown tech '$ext' — skipping"
+    echo "⚠️ Warning: Unknown temp-ext '$ext' — skipping"
   fi
 done
 
