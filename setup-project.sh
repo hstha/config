@@ -72,23 +72,29 @@ FRONTEND_EXTENSIONS=(
   "esbenp.prettier-vscode"
 )
 
-# Extension map
-declare -A EXTENSION_MAP
-EXTENSION_MAP["angular"]="ms-vscode.vscode-typescript-next angular.ng-template"
-EXTENSION_MAP["tailwindcss"]="bradlc.vscode-tailwindcss"
-EXTENSION_MAP["springboot"]="vscjava.vscode-java-pack pivotal.vscode-spring-boot redhat.java"
-EXTENSION_MAP["react"]="ms-vscode.vscode-typescript-next"
-EXTENSION_MAP["vue"]="vue.volar"
-EXTENSION_MAP["node"]="ms-vscode.node-debug2"
-EXTENSION_MAP["python"]="ms-python.python ms-toolsai.jupyter"
+# Function to map tech to extensions
+get_extensions_for() {
+  case "$1" in
+    angular) echo "ms-vscode.vscode-typescript-next angular.ng-template";;
+    tailwindcss) echo "bradlc.vscode-tailwindcss";;
+    springboot) echo "vscjava.vscode-java-pack pivotal.vscode-spring-boot redhat.java";;
+    react) echo "ms-vscode.vscode-typescript-next";;
+    vue) echo "vue.volar";;
+    node) echo "ms-vscode.node-debug2";;
+    python) echo "ms-python.python ms-toolsai.jupyter";;
+    *) echo ""; echo "⚠️ Warning: Unknown temp-ext '$1' — skipping";;
+  esac
+}
 
 # Detect frontend tech
 IS_FRONTEND=false
 for ext in "${TEMP_EXT[@]}"; do
-  if [[ "$ext" =~ ^(angular|react|vue|tailwindcss)$ ]]; then
-    IS_FRONTEND=true
-    break
-  fi
+  case "$ext" in
+    angular|react|vue|tailwindcss)
+      IS_FRONTEND=true
+      break
+      ;;
+  esac
 done
 
 # Collect extensions
@@ -98,13 +104,10 @@ if $IS_FRONTEND; then
 fi
 
 for ext in "${TEMP_EXT[@]}"; do
-  if [[ -n "${EXTENSION_MAP[$ext]}" ]]; then
-    for e in ${EXTENSION_MAP[$ext]}; do
-      EXTENSIONS+=("$e")
-    done
-  else
-    echo "⚠️ Warning: Unknown temp-ext '$ext' — skipping"
-  fi
+  EXT_LIST=$(get_extensions_for "$ext")
+  for e in $EXT_LIST; do
+    EXTENSIONS+=("$e")
+  done
 done
 
 # Create devcontainer folder
