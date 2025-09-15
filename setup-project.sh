@@ -123,12 +123,16 @@ cat > .devcontainer/devcontainer.json <<EOF
     "dockerfile": "Dockerfile",
     "context": "."
   },
-  "settings": {
-    "terminal.integrated.shell.linux": "/bin/bash"
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.shell.linux": "/bin/bash"
+      },
+      "extensions": [
+        $(printf '"%s",\n' "${EXTENSIONS[@]}" | sed '$ s/,$//')
+      ]
+    }
   },
-  "extensions": [
-    $(printf '"%s",\n' "${EXTENSIONS[@]}" | sed '$ s/,$//')
-  ],
   "postCreateCommand": "echo '🚀 Devcontainer ready with: core + ${TEMP_EXT[*]}'"
 }
 EOF
