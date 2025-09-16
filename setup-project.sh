@@ -82,7 +82,7 @@ get_extensions_for() {
     vue) echo "vue.volar";;
     node) echo "ms-vscode.node-debug2";;
     python) echo "ms-python.python ms-toolsai.jupyter";;
-    dotnet) echo "ms-dotnettools.csharp";;
+    dotnet) echo "ms-dotnettools.csharp ms-dotnettools.csharp-devkit ms-vscode.vscode-dotnet-pack formulahendry.dotnet-test-explorer jmrog.vscode-nuget-package-manager ms-dotnettools.razor";;
     *) echo ""; echo "⚠️ Warning: Unknown temp-ext '$1' — skipping";;
   esac
 }
