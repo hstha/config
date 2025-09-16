@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # setup-devcontainer.sh
-# Usage: ./setup-devcontainer.sh --name myproject --temp-ext angular tailwindcss --verbose
+# Usage: ./setup-devcontainer.sh --name myproject --temp-ext angular tailwindcss dotnet --verbose
 
 set -e
 
@@ -82,6 +82,7 @@ get_extensions_for() {
     vue) echo "vue.volar";;
     node) echo "ms-vscode.node-debug2";;
     python) echo "ms-python.python ms-toolsai.jupyter";;
+    dotnet) echo "ms-dotnettools.csharp";;
     *) echo ""; echo "⚠️ Warning: Unknown temp-ext '$1' — skipping";;
   esac
 }
