@@ -39,8 +39,8 @@ ENV PATH="$BUN_INSTALL/bin:$PATH"
 # Install Angular CLI
 RUN npm install -g @angular/cli
 
-# Install .NET SDK (LTS version 8.0)
-RUN curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --version 8.0.100
+# Install .NET SDK (LTS version)
+RUN curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --channel LTS
 ENV DOTNET_ROOT="/root/.dotnet"
 ENV PATH="$DOTNET_ROOT:$PATH"
 

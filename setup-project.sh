@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 # setup-devcontainer.sh
-# Usage: ./setup-devcontainer.sh --name myproject --temp-ext angular tailwindcss dotnet --verbose
+# Usage: ./setup-devcontainer.sh --name myproject --temp-ext angular tailwindcss dotnet csharp java --verbose
 
-set -e
+set -euo pipefail
 
 # Default values
 CONTAINER_NAME="custom-devcontainer"
@@ -11,11 +11,22 @@ TEMP_EXT=()
 VERBOSE=false
 CLEAN=false
 
+# Helper
+verbose() {
+  if $VERBOSE; then
+    echo "$@"
+  fi
+}
+
 # Parse arguments
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --name)
-      CONTAINER_NAME="$2"
+      CONTAINER_NAME="${2:-}"
+      if [[ -z "$CONTAINER_NAME" ]]; then
+        echo "❌ --name requires a value"
+        exit 1
+      fi
       shift 2
       ;;
     --temp-ext)
@@ -55,7 +66,7 @@ fi
 BASE_URL="https://raw.githubusercontent.com/hstha/config/main"
 VSCODE_URL="${BASE_URL}/.vscode"
 
-# Core extensions
+# Core extensions (one per element)
 CORE_EXTENSIONS=(
   "streetsidesoftware.code-spell-checker"
   "github.copilot"
@@ -72,18 +83,25 @@ FRONTEND_EXTENSIONS=(
   "esbenp.prettier-vscode"
 )
 
-# Function to map tech to extensions
+# Function to map tech to extensions; prints nothing on unknown but returns non-zero
 get_extensions_for() {
-  case "$1" in
-    angular) echo "ms-vscode.vscode-typescript-next angular.ng-template";;
-    tailwindcss) echo "bradlc.vscode-tailwindcss";;
-    springboot) echo "vscjava.vscode-java-pack pivotal.vscode-spring-boot redhat.java";;
-    react) echo "ms-vscode.vscode-typescript-next";;
-    vue) echo "vue.volar";;
-    node) echo "ms-vscode.node-debug2";;
-    python) echo "ms-python.python ms-toolsai.jupyter";;
-    dotnet) echo "ms-dotnettools.csharp ms-dotnettools.csdevkit ms-vscode.vscode-dotnet-pack formulahendry.dotnet-test-explorer jmrog.vscode-nuget-package-manager ms-dotnettools.razor";;
-    *) echo ""; echo "⚠️ Warning: Unknown temp-ext '$1' — skipping";;
+  local tech="$1"
+  case "$tech" in
+    angular) printf "%s\n" "ms-vscode.vscode-typescript-next" "angular.ng-template"; return 0;;
+    tailwindcss) printf "%s\n" "bradlc.vscode-tailwindcss"; return 0;;
+    springboot) printf "%s\n" "vscjava.vscode-java-pack" "pivotal.vscode-spring-boot" "redhat.java"; return 0;;
+    react) printf "%s\n" "ms-vscode.vscode-typescript-next"; return 0;;
+    vue) printf "%s\n" "vue.volar"; return 0;;
+    node) printf "%s\n" "ms-vscode.node-debug2"; return 0;;
+    python) printf "%s\n" "ms-python.python" "ms-toolsai.jupyter"; return 0;;
+    dotnet) printf "%s\n" "ms-dotnettools.csharp" "ms-dotnettools.csdevkit" "ms-vscode.vscode-dotnet-pack" "formulahendry.dotnet-test-explorer" "jmrog.vscode-nuget-package-manager" "ms-dotnettools.razor"; return 0;;
+    csharp) printf "%s\n" "ms-dotnettools.csharp" "ms-dotnettools.csdevkit" "formulahendry.dotnet-test-explorer" "jmrog.vscode-nuget-package-manager"; return 0;;
+    java) printf "%s\n" "vscjava.vscode-java-pack" "redhat.java" "vscjava.vscode-maven" "pivotal.vscode-spring-boot" "visualstudioexptteam.vscodeintellicode"; return 0;;
+    *)
+      # Unknown tech: emit a single warning and return non-zero
+      echo "⚠️ Warning: Unknown temp-ext '$tech' — skipping" >&2
+      return 1
+      ;;
   esac
 }
 
@@ -98,23 +116,48 @@ for ext in "${TEMP_EXT[@]}"; do
   esac
 done
 
-# Collect extensions
+# Collect extensions into an array (preserve order)
 EXTENSIONS=("${CORE_EXTENSIONS[@]}")
 if $IS_FRONTEND; then
   EXTENSIONS+=("${FRONTEND_EXTENSIONS[@]}")
 fi
 
+# Add tech-specific extensions (read line-by-line to avoid word splitting)
 for ext in "${TEMP_EXT[@]}"; do
-  EXT_LIST=$(get_extensions_for "$ext")
-  for e in $EXT_LIST; do
-    EXTENSIONS+=("$e")
-  done
+  while IFS= read -r e; do
+    # only add non-empty lines
+    [[ -n "${e:-}" ]] && EXTENSIONS+=("$e")
+  done < <(get_extensions_for "$ext" || true)
 done
 
-# Create devcontainer folder
+# Remove duplicates while preserving order
+dedupe_extensions() {
+  declare -A seen=()
+  local out=()
+  for e in "$@"; do
+    if [[ -z "${seen[$e]:-}" ]]; then
+      seen[$e]=1
+      out+=("$e")
+    fi
+  done
+  printf "%s\n" "${out[@]}"
+}
+
+mapfile -t EXT_UNIQUE < <(dedupe_extensions "${EXTENSIONS[@]}")
+
+# Create devcontainer folder and download Dockerfile
 mkdir -p .devcontainer
-curl -sSL "${BASE_URL}/Dockerfile" -o .devcontainer/Dockerfile
-$VERBOSE && echo "📦 Dockerfile downloaded"
+if curl -fsSL "${BASE_URL}/Dockerfile" -o .devcontainer/Dockerfile; then
+  verbose "📦 Dockerfile downloaded"
+else
+  echo "❌ Failed to download Dockerfile from ${BASE_URL}/Dockerfile"
+  exit 1
+fi
+
+# Build the extensions JSON array string safely
+extensions_json="$(printf '%s\n' "${EXT_UNIQUE[@]}" | sed 's/\\/\\\\/g; s/"/\\"/g' | awk '{printf "\"%s\",", $0} END{print ""}' )"
+# remove trailing comma
+extensions_json="$(echo "$extensions_json" | sed 's/,$//')"
 
 # Generate devcontainer.json
 cat > .devcontainer/devcontainer.json <<EOF
@@ -130,27 +173,35 @@ cat > .devcontainer/devcontainer.json <<EOF
         "terminal.integrated.shell.linux": "/bin/bash"
       },
       "extensions": [
-        $(printf '"%s",\n' "${EXTENSIONS[@]}" | sed '$ s/,$//')
+        ${extensions_json}
       ]
     }
   },
   "postCreateCommand": "echo '🚀 Devcontainer ready with: core + ${TEMP_EXT[*]}'"
 }
 EOF
-$VERBOSE && echo "🛠 devcontainer.json created"
+verbose "🛠 devcontainer.json created"
 
-# Pull VS Code settings
+# Pull VS Code settings (best-effort)
 mkdir -p .vscode
-curl -sSL "${VSCODE_URL}/settings.json" -o .vscode/settings.json
-curl -sSL "${VSCODE_URL}/launch.json" -o .vscode/launch.json
-$VERBOSE && echo "⚙️ VS Code settings downloaded"
+if curl -fsSL "${VSCODE_URL}/settings.json" -o .vscode/settings.json; then
+  verbose "⚙️ VS Code settings.json downloaded"
+else
+  verbose "⚠️ Could not download settings.json from ${VSCODE_URL}/settings.json"
+fi
 
-# Copy starter templates
+if curl -fsSL "${VSCODE_URL}/launch.json" -o .vscode/launch.json; then
+  verbose "⚙️ VS Code launch.json downloaded"
+else
+  verbose "⚠️ Could not download launch.json from ${VSCODE_URL}/launch.json"
+fi
+
+# Copy starter templates (if present)
 for ext in "${TEMP_EXT[@]}"; do
   TEMPLATE_DIR="templates/${ext}"
   if [[ -d "$TEMPLATE_DIR" ]]; then
     cp -r "$TEMPLATE_DIR/"* .
-    $VERBOSE && echo "📁 Starter files copied from $TEMPLATE_DIR"
+    verbose "📁 Starter files copied from $TEMPLATE_DIR"
   fi
 done
 
